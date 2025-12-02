@@ -1,0 +1,10 @@
+
+
+/* 4. Điều chỉnh form/box đăng nhập (nếu cần) */
+/* Cập nhật box đăng nhập để có background trắng và border radius */
+.card { /* Hoặc tên class chứa form đăng nhập của bạn */
+    background-color: rgba(255, 255, 255, 0.95); /* Làm form hơi trong suốt một chút */
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3); /* Tạo bóng đổ ấn tượng hơn */
+    border: none;
+    padding: 30px; /* Thêm padding bên trong form */
+}
