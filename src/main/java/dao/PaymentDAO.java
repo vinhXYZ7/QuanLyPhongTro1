@@ -13,6 +13,7 @@ public class PaymentDAO {
     public List<Payment> getAllPayments() {
         List<Payment> payments = new ArrayList<>();
         String SQL = "SELECT * FROM Payment ORDER BY payment_date DESC";
+
         try (Connection conn = DatabaseConfig.getConnection();
              Statement stmt = conn.createStatement();
              ResultSet rs = stmt.executeQuery(SQL)) {
@@ -29,14 +30,16 @@ public class PaymentDAO {
                 payments.add(payment);
             }
         } catch (SQLException e) {
+            System.err.println("❌ Lỗi getAllPayments: " + e.getMessage());
             e.printStackTrace();
         }
         return payments;
     }
 
-    // ✅ BỔ SUNG: Lấy thanh toán theo ID
+    // Lấy thanh toán theo ID
     public Payment getPaymentById(int paymentId) {
         String SQL = "SELECT * FROM Payment WHERE payment_id = ?";
+
         try (Connection conn = DatabaseConfig.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(SQL)) {
 
@@ -55,6 +58,7 @@ public class PaymentDAO {
                 }
             }
         } catch (SQLException e) {
+            System.err.println("❌ Lỗi getPaymentById: " + e.getMessage());
             e.printStackTrace();
         }
         return null;
@@ -63,6 +67,7 @@ public class PaymentDAO {
     // Thêm thanh toán mới
     public boolean addPayment(Payment payment) {
         String SQL = "INSERT INTO Payment (contract_id, amount, payment_date, method, description) VALUES (?, ?, ?, ?, ?)";
+
         try (Connection conn = DatabaseConfig.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(SQL)) {
 
@@ -72,8 +77,12 @@ public class PaymentDAO {
             pstmt.setString(4, payment.getMethod());
             pstmt.setString(5, payment.getDescription());
 
-            return pstmt.executeUpdate() > 0;
+            int rowsAffected = pstmt.executeUpdate();
+            System.out.println("✅ Thêm thanh toán thành công");
+            return rowsAffected > 0;
+
         } catch (SQLException e) {
+            System.err.println("❌ Lỗi addPayment: " + e.getMessage());
             e.printStackTrace();
             return false;
         }
@@ -82,6 +91,7 @@ public class PaymentDAO {
     // Cập nhật thanh toán
     public boolean updatePayment(Payment payment) {
         String SQL = "UPDATE Payment SET contract_id = ?, amount = ?, payment_date = ?, method = ?, description = ? WHERE payment_id = ?";
+
         try (Connection conn = DatabaseConfig.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(SQL)) {
 
@@ -92,23 +102,44 @@ public class PaymentDAO {
             pstmt.setString(5, payment.getDescription());
             pstmt.setInt(6, payment.getPaymentId());
 
-            return pstmt.executeUpdate() > 0;
+            int rowsAffected = pstmt.executeUpdate();
+
+            if (rowsAffected > 0) {
+                System.out.println("✅ Cập nhật thanh toán ID " + payment.getPaymentId() + " thành công");
+                return true;
+            } else {
+                System.err.println("⚠️ Không tìm thấy thanh toán ID " + payment.getPaymentId());
+                return false;
+            }
+
         } catch (SQLException e) {
+            System.err.println("❌ Lỗi updatePayment: " + e.getMessage());
             e.printStackTrace();
             return false;
         }
     }
 
-    // Xóa thanh toán
+    // XÓA THANH TOÁN - ✅ ĐÃ SỬA LỖI
     public boolean deletePayment(int paymentId) {
         String SQL = "DELETE FROM Payment WHERE payment_id = ?";
+
         try (Connection conn = DatabaseConfig.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(SQL)) {
 
             pstmt.setInt(1, paymentId);
 
-            return pstmt.executeUpdate() > 0;
+            int rowsAffected = pstmt.executeUpdate();
+
+            if (rowsAffected > 0) {
+                System.out.println("✅ Xóa thanh toán ID " + paymentId + " thành công");
+                return true;
+            } else {
+                System.err.println("⚠️ Không thể xóa thanh toán ID " + paymentId);
+                return false;
+            }
+
         } catch (SQLException e) {
+            System.err.println("❌ Lỗi deletePayment: " + e.getMessage());
             e.printStackTrace();
             return false;
         }
@@ -117,8 +148,8 @@ public class PaymentDAO {
     // Lấy tất cả Contract ID (Để dùng cho ComboBox trong PaymentPanel)
     public List<Integer> getAllContractIds() {
         List<Integer> contractIds = new ArrayList<>();
-        // Chỉ lấy ID của các hợp đồng đang hoạt động
         String SQL = "SELECT contract_id FROM Contract WHERE status = 'Đang thuê'";
+
         try (Connection conn = DatabaseConfig.getConnection();
              Statement stmt = conn.createStatement();
              ResultSet rs = stmt.executeQuery(SQL)) {
@@ -127,6 +158,7 @@ public class PaymentDAO {
                 contractIds.add(rs.getInt("contract_id"));
             }
         } catch (SQLException e) {
+            System.err.println("❌ Lỗi getAllContractIds: " + e.getMessage());
             e.printStackTrace();
         }
         return contractIds;

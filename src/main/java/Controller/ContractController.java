@@ -58,6 +58,9 @@ public class ContractController extends HttpServlet {
                 showAddForm(request, response, userId);
             } else if (action.equals("showEditForm")) {
                 showEditForm(request, response, userId);
+            } else if (action.equals("delete")) {
+                // ✅ SỬA: Xử lý DELETE qua GET (khi click link xóa)
+                deleteContractViaGet(request, response, userId);
             } else {
                 listContracts(request, response, userId);
             }
@@ -92,6 +95,7 @@ public class ContractController extends HttpServlet {
                     updateContract(request, response, userId);
                     break;
                 case "delete":
+                    // POST delete (nếu dùng form)
                     deleteContract(request, response, userId);
                     break;
                 default:
@@ -118,11 +122,9 @@ public class ContractController extends HttpServlet {
     private void showAddForm(HttpServletRequest request, HttpServletResponse response, int userId)
             throws ServletException, IOException {
 
-        // ✅ LẤY DANH SÁCH PHÒNG TRỐNG
         List<Room> availableRooms = roomService.getVacantRooms(userId);
         request.setAttribute("availableRooms", availableRooms);
 
-        // ✅ LẤY DANH SÁCH KHÁCH THUÊ
         List<Tenant> availableTenants = tenantService.getAllTenants(userId);
         request.setAttribute("availableTenants", availableTenants);
 
@@ -140,7 +142,6 @@ public class ContractController extends HttpServlet {
             return;
         }
 
-        // Lấy danh sách phòng và khách thuê (bao gồm cả đang sử dụng trong hợp đồng này)
         List<Room> availableRooms = roomService.getVacantRooms(userId);
         List<Tenant> availableTenants = tenantService.getAllTenants(userId);
 
@@ -149,6 +150,23 @@ public class ContractController extends HttpServlet {
         request.setAttribute("availableTenants", availableTenants);
 
         request.getRequestDispatcher(CONTRACT_FORM_JSP).forward(request, response);
+    }
+
+    // ✅ XỬ LÝ DELETE QUA GET (Khi click link)
+    private void deleteContractViaGet(HttpServletRequest request, HttpServletResponse response, int userId)
+            throws IOException {
+
+        int contractId = Integer.parseInt(request.getParameter("id"));
+
+        boolean success = contractService.deleteContract(contractId, userId);
+
+        if (!success) {
+            request.getSession().setAttribute("message", "Lỗi: Không thể xóa hợp đồng.");
+        } else {
+            request.getSession().setAttribute("message", "Xóa hợp đồng thành công!");
+        }
+
+        response.sendRedirect(request.getContextPath() + "/quan-ly-hop-dong");
     }
 
     // ===== POST HELPERS =====
@@ -164,7 +182,6 @@ public class ContractController extends HttpServlet {
         } else {
             request.setAttribute("errorMessage", "Lỗi: Không thể tạo hợp đồng. Kiểm tra phòng và khách thuê.");
 
-            // Giữ lại dữ liệu để user không mất
             List<Room> availableRooms = roomService.getVacantRooms(userId);
             List<Tenant> availableTenants = tenantService.getAllTenants(userId);
             request.setAttribute("availableRooms", availableRooms);
@@ -196,8 +213,6 @@ public class ContractController extends HttpServlet {
             throws IOException {
 
         int contractId = Integer.parseInt(request.getParameter("id"));
-
-        // Gọi service để xóa (service sẽ kiểm tra quyền sở hữu)
         boolean success = contractService.deleteContract(contractId, userId);
 
         if (!success) {
@@ -266,7 +281,7 @@ public class ContractController extends HttpServlet {
             }
         }
 
-        // Set Status (mặc định "Đang thuê" cho hợp đồng mới)
+        // Set Status
         if (status != null && !status.trim().isEmpty()) {
             contract.setStatus(status);
         } else {
@@ -285,7 +300,6 @@ public class ContractController extends HttpServlet {
             }
         }
 
-        // Staff ID mặc định = 1 (hoặc lấy từ user hiện tại nếu cần)
         contract.setStaffId(1);
 
         return contract;

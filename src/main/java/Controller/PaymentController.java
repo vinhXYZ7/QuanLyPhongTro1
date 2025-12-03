@@ -57,6 +57,11 @@ public class PaymentController extends HttpServlet {
                     showEditForm(request, response);
                     break;
 
+                case "delete":
+                    // ✅ XỬ LÝ DELETE QUA GET (Khi click link xóa)
+                    deletePaymentViaGet(request, response);
+                    break;
+
                 case "list":
                 default:
                     listPayments(request, response);
@@ -92,6 +97,7 @@ public class PaymentController extends HttpServlet {
                     updatePayment(request, response);
                     break;
                 case "delete":
+                    // POST delete (ít dùng)
                     deletePayment(request, response);
                     break;
                 default:
@@ -120,7 +126,6 @@ public class PaymentController extends HttpServlet {
     private void showAddForm(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
-        // Lấy danh sách Contract ID để hiển thị trong dropdown
         List<Integer> contractIds = paymentService.getAllActiveContractIds();
         request.setAttribute("contractIds", contractIds);
 
@@ -139,13 +144,28 @@ public class PaymentController extends HttpServlet {
             return;
         }
 
-        // Lấy danh sách Contract ID
         List<Integer> contractIds = paymentService.getAllActiveContractIds();
         request.setAttribute("contractIds", contractIds);
         request.setAttribute("payment", existingPayment);
 
         RequestDispatcher dispatcher = request.getRequestDispatcher(PAYMENT_FORM_JSP);
         dispatcher.forward(request, response);
+    }
+
+    // ✅ XỬ LÝ DELETE QUA GET (Khi click link xóa)
+    private void deletePaymentViaGet(HttpServletRequest request, HttpServletResponse response)
+            throws IOException {
+
+        int paymentId = Integer.parseInt(request.getParameter("id"));
+        boolean success = paymentService.deletePayment(paymentId);
+
+        if (!success) {
+            request.getSession().setAttribute("message", "Lỗi: Không thể xóa thanh toán.");
+        } else {
+            request.getSession().setAttribute("message", "Xóa thanh toán thành công!");
+        }
+
+        response.sendRedirect(request.getContextPath() + "/quan-ly-thanh-toan");
     }
 
     // ===== POST HELPERS =====

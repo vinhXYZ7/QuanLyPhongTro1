@@ -66,6 +66,21 @@
             box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
         }
 
+        /* ✅ VALIDATION STYLES */
+        .form-control.is-invalid, .form-select.is-invalid {
+            border-color: #e74c3c;
+        }
+
+        .form-control.is-valid, .form-select.is-valid {
+            border-color: #27ae60;
+        }
+
+        .invalid-feedback {
+            color: #e74c3c;
+            font-size: 0.875rem;
+            margin-top: 5px;
+        }
+
         .input-group-text {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
@@ -167,7 +182,7 @@
         </div>
 
         <!-- Form -->
-        <form method="post" action="${pageContext.request.contextPath}/quan-ly-phong">
+        <form method="post" action="${pageContext.request.contextPath}/quan-ly-phong" id="roomForm" novalidate>
             <!-- Hidden Fields -->
             <input type="hidden" name="action" value="${room != null ? 'update' : 'add'}">
             <c:if test="${room != null}">
@@ -187,6 +202,7 @@
                            value="${room != null ? room.roomNumber : ''}"
                            placeholder="Ví dụ: A101"
                            required>
+                    <div class="invalid-feedback">Vui lòng nhập số phòng (ví dụ: A101, B202)</div>
                 </div>
 
                 <!-- Loại Phòng -->
@@ -200,6 +216,7 @@
                         <option value="Phòng VIP" ${room != null && room.type == 'Phòng VIP' ? 'selected' : ''}>Phòng VIP</option>
                         <option value="Căn Hộ" ${room != null && room.type == 'Căn Hộ' ? 'selected' : ''}>Căn Hộ</option>
                     </select>
+                    <div class="invalid-feedback">Vui lòng chọn loại phòng</div>
                 </div>
             </div>
 
@@ -223,6 +240,7 @@
                                step="100000"
                                required>
                     </div>
+                    <div class="invalid-feedback">Giá thuê phải từ 100,000 VNĐ trở lên</div>
                 </div>
 
                 <!-- Tầng -->
@@ -239,6 +257,7 @@
                            min="1"
                            max="50"
                            required>
+                    <div class="invalid-feedback">Tầng phải từ 1 đến 50</div>
                 </div>
             </div>
 
@@ -249,16 +268,11 @@
                 </label>
                 <select class="form-select" id="status" name="status" required>
                     <option value="">-- Chọn Trạng Thái --</option>
-                    <option value="Trống" ${room != null && room.status == 'Trống' ? 'selected' : ''}>
-                        Trống
-                    </option>
-                    <option value="Đang thuê" ${room != null && room.status == 'Đang thuê' ? 'selected' : ''}>
-                        Đang thuê
-                    </option>
-                    <option value="Bảo trì" ${room != null && room.status == 'Bảo trì' ? 'selected' : ''}>
-                        Bảo trì
-                    </option>
+                    <option value="Trống" ${room != null && room.status == 'Trống' ? 'selected' : ''}>Trống</option>
+                    <option value="Đang thuê" ${room != null && room.status == 'Đang thuê' ? 'selected' : ''}>Đang thuê</option>
+                    <option value="Bảo trì" ${room != null && room.status == 'Bảo trì' ? 'selected' : ''}>Bảo trì</option>
                 </select>
+                <div class="invalid-feedback">Vui lòng chọn trạng thái phòng</div>
             </div>
 
             <!-- Mô Tả -->
@@ -290,17 +304,73 @@
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script>
-    // Format price input
-    const priceInput = document.getElementById('price');
-    priceInput.addEventListener('blur', function() {
-        if (this.value) {
-            const value = parseFloat(this.value.replace(/,/g, ''));
-            if (!isNaN(value)) {
-                // Round to nearest 100,000
-                this.value = Math.round(value / 100000) * 100000;
+    // ✅ VALIDATION SCRIPT
+    (function() {
+        'use strict';
+
+        const form = document.getElementById('roomForm');
+        const priceInput = document.getElementById('price');
+        const roomNumberInput = document.getElementById('roomNumber');
+
+        // Format price input
+        priceInput.addEventListener('blur', function() {
+            if (this.value) {
+                const value = parseFloat(this.value.replace(/,/g, ''));
+                if (!isNaN(value) && value >= 100000) {
+                    // Round to nearest 100,000
+                    this.value = Math.round(value / 100000) * 100000;
+                }
             }
-        }
-    });
+        });
+
+        // Validate room number format (chữ + số)
+        roomNumberInput.addEventListener('input', function() {
+            const value = this.value.trim();
+            const validPattern = /^[A-Z0-9]+$/i;
+
+            if (value && !validPattern.test(value)) {
+                this.setCustomValidity('Số phòng chỉ được chứa chữ cái và số (ví dụ: A101, B202)');
+            } else {
+                this.setCustomValidity('');
+            }
+        });
+
+        // Form validation on submit
+        form.addEventListener('submit', function(event) {
+            if (!form.checkValidity()) {
+                event.preventDefault();
+                event.stopPropagation();
+            }
+
+            // Mark all fields as validated
+            const inputs = form.querySelectorAll('input, select, textarea');
+            inputs.forEach(function(input) {
+                if (input.checkValidity()) {
+                    input.classList.remove('is-invalid');
+                    input.classList.add('is-valid');
+                } else {
+                    input.classList.remove('is-valid');
+                    input.classList.add('is-invalid');
+                }
+            });
+        }, false);
+
+        // Real-time validation
+        const inputs = form.querySelectorAll('input, select');
+        inputs.forEach(function(input) {
+            input.addEventListener('blur', function() {
+                if (this.value) {
+                    if (this.checkValidity()) {
+                        this.classList.remove('is-invalid');
+                        this.classList.add('is-valid');
+                    } else {
+                        this.classList.remove('is-valid');
+                        this.classList.add('is-invalid');
+                    }
+                }
+            });
+        });
+    })();
 </script>
 
 </body>

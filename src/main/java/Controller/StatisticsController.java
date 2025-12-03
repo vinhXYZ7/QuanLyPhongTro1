@@ -78,7 +78,8 @@ public class StatisticsController extends HttpServlet {
         } catch (Exception ex) {
             ex.printStackTrace();
             request.setAttribute("errorMessage", "Lỗi xử lý thống kê: " + ex.getMessage());
-            request.getRequestDispatcher("/WEB-INF/views/error.jsp").forward(request, response);
+            // Chuyển về trang chủ nếu lỗi
+            response.sendRedirect(request.getContextPath() + "/trang-chu");
         }
     }
 }

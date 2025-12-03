@@ -55,6 +55,10 @@ public class TenantController extends HttpServlet {
                     showEditForm(request, response, userId);
                     break;
 
+                case "delete":
+                    deleteTenantViaGet(request, response, userId);
+                    break;
+
                 case "list":
                 default:
                     listTenants(request, response, userId);
@@ -63,7 +67,7 @@ public class TenantController extends HttpServlet {
         } catch (Exception ex) {
             ex.printStackTrace();
             request.setAttribute("errorMessage", "Lỗi xử lý yêu cầu GET: " + ex.getMessage());
-            request.getRequestDispatcher("/WEB-INF/views/error.jsp").forward(request, response);
+            listTenants(request, response, userId);
         }
     }
 
@@ -99,7 +103,8 @@ public class TenantController extends HttpServlet {
         } catch (Exception ex) {
             ex.printStackTrace();
             request.setAttribute("errorMessage", "Đã xảy ra lỗi: " + ex.getMessage());
-            request.getRequestDispatcher("/WEB-INF/views/error.jsp").forward(request, response);
+            int userId = getCurrentUserId(request);
+            listTenants(request, response, userId);
         }
     }
 
@@ -129,13 +134,30 @@ public class TenantController extends HttpServlet {
         Tenant existingTenant = tenantService.getTenantById(id, userId);
 
         if (existingTenant == null) {
-            response.sendError(HttpServletResponse.SC_NOT_FOUND, "Không tìm thấy khách thuê hoặc bạn không có quyền truy cập.");
+            request.setAttribute("errorMessage", "Không tìm thấy khách thuê hoặc bạn không có quyền truy cập.");
+            listTenants(request, response, userId);
             return;
         }
 
         request.setAttribute("tenant", existingTenant);
         RequestDispatcher dispatcher = request.getRequestDispatcher(TENANT_FORM_JSP);
         dispatcher.forward(request, response);
+    }
+
+    private void deleteTenantViaGet(HttpServletRequest request, HttpServletResponse response, int userId)
+            throws IOException {
+
+        int tenantId = Integer.parseInt(request.getParameter("id"));
+
+        boolean success = tenantService.deleteTenant(tenantId, userId);
+
+        if (!success) {
+            request.getSession().setAttribute("message", "Lỗi: Không thể xóa khách thuê, có thể đang có hợp đồng.");
+        } else {
+            request.getSession().setAttribute("message", "Xóa khách thuê thành công!");
+        }
+
+        response.sendRedirect(request.getContextPath() + "/quan-ly-khach-thue");
     }
 
     // ===== POST HELPERS =====
@@ -146,11 +168,15 @@ public class TenantController extends HttpServlet {
         int userId = getCurrentUserId(request);
         Tenant newTenant = extractTenantData(request, true);
 
+        System.out.println("DEBUG - Thêm khách: " + newTenant.getName() + ", CMND: " + newTenant.getIdCard() + ", Phone: " + newTenant.getPhone());
+
         boolean success = tenantService.addTenant(newTenant, userId);
 
         if (success) {
+            System.out.println("✅ Thêm khách thuê thành công!");
             response.sendRedirect(request.getContextPath() + "/quan-ly-khach-thue");
         } else {
+            System.out.println("❌ Thêm khách thuê thất bại!");
             request.setAttribute("errorMessage", "Lỗi: CMND/CCCD hoặc số điện thoại đã tồn tại.");
             request.setAttribute("tenant", newTenant);
             request.getRequestDispatcher(TENANT_FORM_JSP).forward(request, response);
@@ -198,11 +224,11 @@ public class TenantController extends HttpServlet {
         String address = request.getParameter("address");
 
         Tenant tenant = new Tenant();
-        tenant.setName(name);
-        tenant.setPhone(phone);
-        tenant.setEmail(email);
-        tenant.setIdCard(idCard);
-        tenant.setAddress(address);
+        tenant.setName(name != null ? name.trim() : "");
+        tenant.setPhone(phone != null ? phone.trim() : "");
+        tenant.setEmail(email != null ? email.trim() : "");
+        tenant.setIdCard(idCard != null ? idCard.trim() : "");
+        tenant.setAddress(address != null ? address.trim() : "");
 
         if (!isNew) {
             String tenantIdStr = request.getParameter("tenantId");

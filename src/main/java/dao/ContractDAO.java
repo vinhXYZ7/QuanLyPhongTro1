@@ -12,7 +12,6 @@ public class ContractDAO {
     public List<Contract> getAllContracts(int userId) {
         List<Contract> contracts = new ArrayList<>();
 
-        // ✅ JOIN để lấy tên khách thuê và số phòng
         String SQL = "SELECT c.*, t.name as tenant_name, r.room_number " +
                 "FROM Contract c " +
                 "LEFT JOIN Tenant t ON c.tenant_id = t.tenant_id " +
@@ -38,8 +37,6 @@ public class ContractDAO {
                             rs.getBigDecimal("deposit_amount")
                     );
                     contract.setUserId(rs.getInt("user_id"));
-
-                    // ✅ Set tên khách thuê và số phòng
                     contract.setTenantName(rs.getString("tenant_name"));
                     contract.setRoomNumber(rs.getString("room_number"));
 
@@ -47,6 +44,7 @@ public class ContractDAO {
                 }
             }
         } catch (SQLException e) {
+            System.err.println("❌ Lỗi getAllContracts: " + e.getMessage());
             e.printStackTrace();
         }
         return contracts;
@@ -69,8 +67,12 @@ public class ContractDAO {
             pstmt.setBigDecimal(7, contract.getDepositAmount());
             pstmt.setInt(8, contract.getUserId());
 
-            return pstmt.executeUpdate() > 0;
+            int rowsAffected = pstmt.executeUpdate();
+            System.out.println("✅ Thêm hợp đồng thành công");
+            return rowsAffected > 0;
+
         } catch (SQLException e) {
+            System.err.println("❌ Lỗi addContract: " + e.getMessage());
             e.printStackTrace();
             return false;
         }
@@ -95,14 +97,24 @@ public class ContractDAO {
             pstmt.setInt(8, contract.getContractId());
             pstmt.setInt(9, contract.getUserId());
 
-            return pstmt.executeUpdate() > 0;
+            int rowsAffected = pstmt.executeUpdate();
+
+            if (rowsAffected > 0) {
+                System.out.println("✅ Cập nhật hợp đồng ID " + contract.getContractId() + " thành công");
+                return true;
+            } else {
+                System.err.println("⚠️ Không tìm thấy hợp đồng ID " + contract.getContractId());
+                return false;
+            }
+
         } catch (SQLException e) {
+            System.err.println("❌ Lỗi updateContract: " + e.getMessage());
             e.printStackTrace();
             return false;
         }
     }
 
-    // ✅ 4. XÓA HỢP ĐỒNG (BỔ SUNG)
+    // 4. XÓA HỢP ĐỒNG - ✅ ĐÃ SỬA LỖI
     public boolean deleteContract(int contractId, int userId) {
         String SQL = "DELETE FROM Contract WHERE contract_id = ? AND user_id = ?";
 
@@ -112,8 +124,18 @@ public class ContractDAO {
             pstmt.setInt(1, contractId);
             pstmt.setInt(2, userId);
 
-            return pstmt.executeUpdate() > 0;
+            int rowsAffected = pstmt.executeUpdate();
+
+            if (rowsAffected > 0) {
+                System.out.println("✅ Xóa hợp đồng ID " + contractId + " thành công");
+                return true;
+            } else {
+                System.err.println("⚠️ Không thể xóa hợp đồng ID " + contractId + " (có thể có thanh toán liên quan)");
+                return false;
+            }
+
         } catch (SQLException e) {
+            System.err.println("❌ Lỗi deleteContract: " + e.getMessage());
             e.printStackTrace();
             return false;
         }
@@ -131,8 +153,12 @@ public class ContractDAO {
             pstmt.setInt(2, contractId);
             pstmt.setInt(3, userId);
 
-            return pstmt.executeUpdate() > 0;
+            int rowsAffected = pstmt.executeUpdate();
+            System.out.println("✅ Kết thúc hợp đồng ID " + contractId);
+            return rowsAffected > 0;
+
         } catch (SQLException e) {
+            System.err.println("❌ Lỗi endContract: " + e.getMessage());
             e.printStackTrace();
             return false;
         }
@@ -165,6 +191,7 @@ public class ContractDAO {
                 }
             }
         } catch (SQLException e) {
+            System.err.println("❌ Lỗi getContractById: " + e.getMessage());
             e.printStackTrace();
         }
         return null;
@@ -187,6 +214,7 @@ public class ContractDAO {
                 }
             }
         } catch (SQLException e) {
+            System.err.println("❌ Lỗi hasActiveContractForRoom: " + e.getMessage());
             e.printStackTrace();
         }
         return false;
@@ -209,6 +237,7 @@ public class ContractDAO {
                 }
             }
         } catch (SQLException e) {
+            System.err.println("❌ Lỗi hasActiveContractForTenant: " + e.getMessage());
             e.printStackTrace();
         }
         return false;

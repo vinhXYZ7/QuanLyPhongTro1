@@ -66,6 +66,22 @@
             box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
         }
 
+        /* ✅ VALIDATION STYLES */
+        .form-control.is-invalid {
+            border-color: #e74c3c;
+        }
+
+        .form-control.is-valid {
+            border-color: #27ae60;
+        }
+
+        .invalid-feedback {
+            color: #e74c3c;
+            font-size: 0.875rem;
+            margin-top: 5px;
+            display: block;
+        }
+
         .btn-submit {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             border: none;
@@ -107,6 +123,19 @@
         .required {
             color: #e74c3c;
         }
+
+        .info-box {
+            background: #e8ebff;
+            border-left: 4px solid #667eea;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+
+        .info-box i {
+            color: #667eea;
+            margin-right: 10px;
+        }
     </style>
 </head>
 <body>
@@ -139,8 +168,14 @@
             </div>
         </c:if>
 
+        <!-- Info Box -->
+        <div class="info-box">
+            <i class="fas fa-info-circle"></i>
+            <strong>Lưu ý:</strong> CMND/CCCD và số điện thoại phải là duy nhất trong hệ thống.
+        </div>
+
         <!-- Form -->
-        <form method="post" action="${pageContext.request.contextPath}/quan-ly-khach-thue">
+        <form method="post" action="${pageContext.request.contextPath}/quan-ly-khach-thue" id="tenantForm" novalidate>
             <!-- Hidden Fields -->
             <input type="hidden" name="action" value="${tenant != null ? 'update' : 'add'}">
             <c:if test="${tenant != null}">
@@ -158,7 +193,10 @@
                        name="name"
                        value="${tenant != null ? tenant.name : ''}"
                        placeholder="Ví dụ: Nguyễn Văn A"
+                       minlength="3"
+                       maxlength="100"
                        required>
+                <div class="invalid-feedback">Họ tên phải từ 3-100 ký tự</div>
             </div>
 
             <!-- CMND/CCCD -->
@@ -175,6 +213,7 @@
                        pattern="[0-9]{9,12}"
                        title="CMND (9 số) hoặc CCCD (12 số)"
                        required>
+                <div class="invalid-feedback">CMND phải có 9 số hoặc CCCD phải có 12 số</div>
             </div>
 
             <!-- Số Điện Thoại -->
@@ -188,9 +227,10 @@
                        name="phone"
                        value="${tenant != null ? tenant.phone : ''}"
                        placeholder="Ví dụ: 0912345678"
-                       pattern="[0-9]{10,11}"
-                       title="Số điện thoại 10-11 chữ số"
+                       pattern="0[0-9]{9,10}"
+                       title="Số điện thoại phải bắt đầu bằng 0 và có 10-11 chữ số"
                        required>
+                <div class="invalid-feedback">Số điện thoại phải có 10-11 số và bắt đầu bằng 0</div>
             </div>
 
             <!-- Email -->
@@ -202,6 +242,7 @@
                        name="email"
                        value="${tenant != null ? tenant.email : ''}"
                        placeholder="Ví dụ: nguyenvana@email.com">
+                <div class="invalid-feedback">Email không hợp lệ</div>
             </div>
 
             <!-- Địa Chỉ -->
@@ -214,7 +255,10 @@
                           name="address"
                           rows="3"
                           placeholder="Ví dụ: 123 Đường ABC, Phường XYZ, Quận 1, TP.HCM"
+                          minlength="10"
+                          maxlength="255"
                           required>${tenant != null ? tenant.address : ''}</textarea>
+                <div class="invalid-feedback">Địa chỉ phải từ 10-255 ký tự</div>
             </div>
 
             <!-- Buttons -->
@@ -235,6 +279,92 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    // ✅ VALIDATION SCRIPT
+    (function() {
+        'use strict';
+
+        const form = document.getElementById('tenantForm');
+        const nameInput = document.getElementById('name');
+        const idCardInput = document.getElementById('idCard');
+        const phoneInput = document.getElementById('phone');
+        const emailInput = document.getElementById('email');
+
+        // Validate name (chỉ chữ cái và khoảng trắng)
+        nameInput.addEventListener('input', function() {
+            const value = this.value.trim();
+            const validPattern = /^[a-zA-ZÀ-ỹ\s]+$/;
+
+            if (value && !validPattern.test(value)) {
+                this.setCustomValidity('Họ tên chỉ được chứa chữ cái và khoảng trắng');
+            } else {
+                this.setCustomValidity('');
+            }
+        });
+
+        // Validate ID Card (9 hoặc 12 số)
+        idCardInput.addEventListener('input', function() {
+            this.value = this.value.replace(/\D/g, ''); // Chỉ cho phép số
+
+            const length = this.value.length;
+            if (this.value && length !== 9 && length !== 12) {
+                this.setCustomValidity('CMND phải có 9 số hoặc CCCD phải có 12 số');
+            } else {
+                this.setCustomValidity('');
+            }
+        });
+
+        // Validate Phone (10-11 số, bắt đầu bằng 0)
+        phoneInput.addEventListener('input', function() {
+            this.value = this.value.replace(/\D/g, ''); // Chỉ cho phép số
+
+            const value = this.value;
+            if (value && (!value.startsWith('0') || value.length < 10 || value.length > 11)) {
+                this.setCustomValidity('Số điện thoại phải có 10-11 số và bắt đầu bằng 0');
+            } else {
+                this.setCustomValidity('');
+            }
+        });
+
+        // Form validation on submit
+        form.addEventListener('submit', function(event) {
+            if (!form.checkValidity()) {
+                event.preventDefault();
+                event.stopPropagation();
+            }
+
+            // Mark all fields as validated
+            const inputs = form.querySelectorAll('input, textarea');
+            inputs.forEach(function(input) {
+                if (input.value.trim()) {
+                    if (input.checkValidity()) {
+                        input.classList.remove('is-invalid');
+                        input.classList.add('is-valid');
+                    } else {
+                        input.classList.remove('is-valid');
+                        input.classList.add('is-invalid');
+                    }
+                }
+            });
+        }, false);
+
+        // Real-time validation
+        const inputs = form.querySelectorAll('input, textarea');
+        inputs.forEach(function(input) {
+            input.addEventListener('blur', function() {
+                if (this.value.trim()) {
+                    if (this.checkValidity()) {
+                        this.classList.remove('is-invalid');
+                        this.classList.add('is-valid');
+                    } else {
+                        this.classList.remove('is-valid');
+                        this.classList.add('is-invalid');
+                    }
+                }
+            });
+        });
+    })();
+</script>
 
 </body>
 </html>

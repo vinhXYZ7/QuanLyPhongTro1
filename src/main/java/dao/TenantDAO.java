@@ -8,17 +8,15 @@ import java.util.List;
 
 public class TenantDAO {
 
-    // ✅ 1. Lấy tất cả khách thuê (Chỉ cần userId)
-    public List<Tenant> getAllTenants(int userId) { // SỬA: Bỏ tenantId khỏi chữ ký
+    // 1. Lấy tất cả khách thuê
+    public List<Tenant> getAllTenants(int userId) {
         List<Tenant> tenants = new ArrayList<>();
-        // SỬA SQL: Chỉ cần lọc theo user_id
-        String SQL = "SELECT * FROM Tenant WHERE user_id = ?";
+        String SQL = "SELECT * FROM Tenant WHERE user_id = ? ORDER BY tenant_id DESC";
 
         try (Connection conn = DatabaseConfig.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(SQL)) {
 
-            // Bỏ pstmt.setInt(1, tenantId);
-            pstmt.setInt(1, userId); // Gán userId
+            pstmt.setInt(1, userId);
 
             try (ResultSet rs = pstmt.executeQuery()){
                 while (rs.next()) {
@@ -30,20 +28,21 @@ public class TenantDAO {
                             rs.getString("id_card"),
                             rs.getString("address")
                     );
-                    tenant.setUserId(rs.getInt("user_id")); // Gán userId từ DB
+                    tenant.setUserId(rs.getInt("user_id"));
                     tenants.add(tenant);
                 }
             }
         } catch (SQLException e) {
+            System.err.println("❌ Lỗi getAllTenants: " + e.getMessage());
             e.printStackTrace();
         }
         return tenants;
     }
 
-    // ✅ 2. Thêm khách thuê mới (Thêm user_id vào INSERT)
+    // 2. Thêm khách thuê mới
     public boolean addTenant(Tenant tenant) {
-        // THÊM cột user_id
         String SQL = "INSERT INTO Tenant (name, phone, email, id_card, address, user_id) VALUES (?, ?, ?, ?, ?, ?)";
+
         try (Connection conn = DatabaseConfig.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(SQL, Statement.RETURN_GENERATED_KEYS)) {
 
@@ -52,74 +51,96 @@ public class TenantDAO {
             pstmt.setString(3, tenant.getEmail());
             pstmt.setString(4, tenant.getIdCard());
             pstmt.setString(5, tenant.getAddress());
-            pstmt.setInt(6, tenant.getUserId()); // Gán userId từ object Tenant
+            pstmt.setInt(6, tenant.getUserId());
 
             int rowsAffected = pstmt.executeUpdate();
 
             if (rowsAffected > 0) {
-                // Lấy ID tự động tăng
                 try (ResultSet rs = pstmt.getGeneratedKeys()) {
                     if (rs.next()) {
-                        tenant.setTenantId(rs.getInt(1)); // Gán ID mới cho đối tượng Tenant
+                        tenant.setTenantId(rs.getInt(1));
                     }
                 }
+                System.out.println("✅ Thêm khách thuê thành công");
                 return true;
             }
             return false;
         } catch (SQLException e) {
+            System.err.println("❌ Lỗi addTenant: " + e.getMessage());
             e.printStackTrace();
             return false;
         }
     }
 
-    // ✅ 3. Cập nhật khách thuê (Thêm user_id vào WHERE)
+    // 3. Cập nhật khách thuê - ✅ ĐÃ SỬA LỖI
     public boolean updateTenant(Tenant tenant) {
-        // THÊM điều kiện user_id = ?
         String SQL = "UPDATE Tenant SET name = ?, phone = ?, email = ?, id_card = ?, address = ? WHERE tenant_id = ? AND user_id = ?";
+
         try (Connection conn = DatabaseConfig.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(SQL)) {
 
+            // ✅ QUAN TRỌNG: Set đúng thứ tự tham số
             pstmt.setString(1, tenant.getName());
             pstmt.setString(2, tenant.getPhone());
             pstmt.setString(3, tenant.getEmail());
             pstmt.setString(4, tenant.getIdCard());
             pstmt.setString(5, tenant.getAddress());
             pstmt.setInt(6, tenant.getTenantId());
-            pstmt.setInt(7, tenant.getUserId()); // Gán userId từ object Tenant
+            pstmt.setInt(7, tenant.getUserId());
 
-            return pstmt.executeUpdate() > 0;
+            int rowsAffected = pstmt.executeUpdate();
+
+            if (rowsAffected > 0) {
+                System.out.println("✅ Cập nhật khách thuê ID " + tenant.getTenantId() + " thành công");
+                return true;
+            } else {
+                System.err.println("⚠️ Không tìm thấy khách thuê ID " + tenant.getTenantId());
+                return false;
+            }
+
         } catch (SQLException e) {
+            System.err.println("❌ Lỗi updateTenant: " + e.getMessage());
             e.printStackTrace();
             return false;
         }
     }
 
-    // ✅ 4. Xóa khách thuê (Thêm userId)
-    public boolean deleteTenant(int tenantId, int userId) { // SỬA: Thêm userId vào chữ ký
-        // THÊM điều kiện user_id = ?
+    // 4. Xóa khách thuê - ✅ ĐÃ SỬA LỖI
+    public boolean deleteTenant(int tenantId, int userId) {
         String SQL = "DELETE FROM Tenant WHERE tenant_id = ? AND user_id = ?";
+
         try (Connection conn = DatabaseConfig.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(SQL)) {
 
             pstmt.setInt(1, tenantId);
-            pstmt.setInt(2, userId); // Gán userId
+            pstmt.setInt(2, userId);
 
-            return pstmt.executeUpdate() > 0;
+            int rowsAffected = pstmt.executeUpdate();
+
+            if (rowsAffected > 0) {
+                System.out.println("✅ Xóa khách thuê ID " + tenantId + " thành công");
+                return true;
+            } else {
+                System.err.println("⚠️ Không thể xóa khách thuê ID " + tenantId + " (có thể đang có hợp đồng)");
+                return false;
+            }
+
         } catch (SQLException e) {
+            System.err.println("❌ Lỗi deleteTenant: " + e.getMessage());
             e.printStackTrace();
             return false;
         }
     }
 
-    // ✅ 5. Lấy thông tin khách thuê theo ID (Đã có chữ ký đúng)
+    // 5. Lấy thông tin khách thuê theo ID
     public Tenant getTenantById(int tenantId, int userId) {
-        // THÊM điều kiện user_id = ?
         String SQL = "SELECT * FROM Tenant WHERE tenant_id = ? AND user_id = ?";
+
         try (Connection conn = DatabaseConfig.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(SQL)) {
 
             pstmt.setInt(1, tenantId);
-            pstmt.setInt(2, userId); // Gán userId
+            pstmt.setInt(2, userId);
 
             try (ResultSet rs = pstmt.executeQuery()) {
                 if (rs.next()) {
@@ -131,26 +152,26 @@ public class TenantDAO {
                             rs.getString("id_card"),
                             rs.getString("address")
                     );
-                    // ✅ SỬA LỖI: Cần gán userId vào object Tenant và return object
                     tenant.setUserId(rs.getInt("user_id"));
                     return tenant;
                 }
             }
         } catch (SQLException e) {
+            System.err.println("❌ Lỗi getTenantById: " + e.getMessage());
             e.printStackTrace();
         }
         return null;
     }
 
-    // ✅ 6. Kiểm tra CMND/CCCD đã tồn tại chưa (Thêm userId)
-    public boolean isIdCardExists(String idCard, int userId) { // SỬA: Thêm userId
-        // THÊM điều kiện user_id = ?
+    // 6. Kiểm tra CMND/CCCD đã tồn tại chưa
+    public boolean isIdCardExists(String idCard, int userId) {
         String SQL = "SELECT COUNT(*) FROM Tenant WHERE id_card = ? AND user_id = ?";
+
         try (Connection conn = DatabaseConfig.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(SQL)) {
 
             pstmt.setString(1, idCard);
-            pstmt.setInt(2, userId); // Gán userId
+            pstmt.setInt(2, userId);
 
             try (ResultSet rs = pstmt.executeQuery()) {
                 if (rs.next()) {
@@ -158,23 +179,25 @@ public class TenantDAO {
                 }
             }
         } catch (SQLException e) {
+            System.err.println("❌ Lỗi isIdCardExists: " + e.getMessage());
             e.printStackTrace();
         }
         return false;
     }
 
-    // ✅ 7. Kiểm tra Số điện thoại đã tồn tại chưa (Thêm userId)
-    public boolean isPhoneExists(String phone, int userId) { // SỬA: Thêm userId
+    // 7. Kiểm tra Số điện thoại đã tồn tại chưa
+    public boolean isPhoneExists(String phone, int userId) {
         if (phone == null || phone.trim().isEmpty()) {
             return false;
         }
-        // THÊM điều kiện user_id = ?
+
         String SQL = "SELECT COUNT(*) FROM Tenant WHERE phone = ? AND user_id = ?";
+
         try (Connection conn = DatabaseConfig.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(SQL)) {
 
             pstmt.setString(1, phone);
-            pstmt.setInt(2, userId); // Gán userId
+            pstmt.setInt(2, userId);
 
             try (ResultSet rs = pstmt.executeQuery()) {
                 if (rs.next()) {
@@ -182,21 +205,22 @@ public class TenantDAO {
                 }
             }
         } catch (SQLException e) {
+            System.err.println("❌ Lỗi isPhoneExists: " + e.getMessage());
             e.printStackTrace();
         }
         return false;
     }
 
-    // ✅ 8. Kiểm tra CMND/CCCD có trùng với người khác không (trừ tenantId hiện tại) (Thêm userId)
-    public boolean isIdCardExistsExcludingId(String idCard, int currentTenantId, int userId) { // SỬA: Thêm userId
-        // THÊM điều kiện user_id = ?
+    // 8. Kiểm tra CMND/CCCD có trùng với người khác không (trừ tenantId hiện tại)
+    public boolean isIdCardExistsExcludingId(String idCard, int currentTenantId, int userId) {
         String SQL = "SELECT COUNT(*) FROM Tenant WHERE id_card = ? AND tenant_id != ? AND user_id = ?";
+
         try (Connection conn = DatabaseConfig.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(SQL)) {
 
             pstmt.setString(1, idCard);
             pstmt.setInt(2, currentTenantId);
-            pstmt.setInt(3, userId); // Gán userId
+            pstmt.setInt(3, userId);
 
             try (ResultSet rs = pstmt.executeQuery()) {
                 if (rs.next()) {
@@ -204,6 +228,7 @@ public class TenantDAO {
                 }
             }
         } catch (SQLException e) {
+            System.err.println("❌ Lỗi isIdCardExistsExcludingId: " + e.getMessage());
             e.printStackTrace();
         }
         return false;
