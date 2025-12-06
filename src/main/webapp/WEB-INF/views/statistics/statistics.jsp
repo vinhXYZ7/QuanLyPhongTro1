@@ -201,6 +201,13 @@
         <p style="margin: 10px 0 0 0; opacity: 0.9;">Theo dõi doanh thu và hiệu quả kinh doanh</p>
     </div>
 
+    <!-- ✅ KIỂM TRA DỮ LIỆU -->
+    <c:if test="${empty overview}">
+        <div class="alert alert-warning m-3">
+            <i class="fas fa-exclamation-triangle"></i> Không có dữ liệu thống kê. Vui lòng kiểm tra lại kết nối database.
+        </div>
+    </c:if>
+
     <!-- Overview Cards -->
     <div style="background: white; padding: 30px; border-radius: 0 0 20px 20px; margin-bottom: 20px; box-shadow: 0 5px 15px rgba(0,0,0,0.1);">
         <div class="row">
@@ -209,7 +216,7 @@
                     <div class="stats-icon icon-primary">
                         <i class="fas fa-door-open"></i>
                     </div>
-                    <div class="stats-value">${overview.totalRooms}</div>
+                    <div class="stats-value">${overview.totalRooms != null ? overview.totalRooms : 0}</div>
                     <div class="stats-label">Tổng Số Phòng</div>
                 </div>
             </div>
@@ -218,7 +225,7 @@
                     <div class="stats-icon icon-success">
                         <i class="fas fa-home"></i>
                     </div>
-                    <div class="stats-value">${overview.occupiedRooms}</div>
+                    <div class="stats-value">${overview.occupiedRooms != null ? overview.occupiedRooms : 0}</div>
                     <div class="stats-label">Phòng Đang Thuê</div>
                 </div>
             </div>
@@ -227,7 +234,7 @@
                     <div class="stats-icon icon-warning">
                         <i class="fas fa-door-closed"></i>
                     </div>
-                    <div class="stats-value">${overview.vacantRooms}</div>
+                    <div class="stats-value">${overview.vacantRooms != null ? overview.vacantRooms : 0}</div>
                     <div class="stats-label">Phòng Trống</div>
                 </div>
             </div>
@@ -236,7 +243,7 @@
                     <div class="stats-icon icon-danger">
                         <i class="fas fa-file-contract"></i>
                     </div>
-                    <div class="stats-value">${overview.activeContracts}</div>
+                    <div class="stats-value">${overview.activeContracts != null ? overview.activeContracts : 0}</div>
                     <div class="stats-label">Hợp Đồng Hoạt Động</div>
                 </div>
             </div>
@@ -247,7 +254,7 @@
                 <div class="stats-card" style="background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%); color: white;">
                     <h5 style="margin: 0 0 10px 0;">Tổng Doanh Thu</h5>
                     <div class="stats-value" style="color: white; font-size: 2.5rem;">
-                        <fmt:formatNumber value="${overview.totalRevenue}" type="number" groupingUsed="true"/> VNĐ
+                        <fmt:formatNumber value="${overview.totalRevenue != null ? overview.totalRevenue : 0}" type="number" groupingUsed="true"/> VNĐ
                     </div>
                 </div>
             </div>
@@ -255,7 +262,7 @@
                 <div class="stats-card" style="background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%); color: white;">
                     <h5 style="margin: 0 0 10px 0;">Doanh Thu Tháng Này</h5>
                     <div class="stats-value" style="color: white; font-size: 2.5rem;">
-                        <fmt:formatNumber value="${overview.currentMonthRevenue}" type="number" groupingUsed="true"/> VNĐ
+                        <fmt:formatNumber value="${overview.currentMonthRevenue != null ? overview.currentMonthRevenue : 0}" type="number" groupingUsed="true"/> VNĐ
                     </div>
                 </div>
             </div>
@@ -291,54 +298,62 @@
     </div>
 
     <!-- Revenue Chart -->
-    <div class="chart-container">
-        <h4 class="mb-4">
-            <i class="fas fa-chart-bar"></i>
-            ${viewType == 'daily' ? 'Doanh Thu Theo Ngày - Tháng ' + selectedMonth + '/' + selectedYear : 'Doanh Thu Theo Tháng - Năm ' + selectedYear}
-        </h4>
-        <canvas id="revenueChart" height="80"></canvas>
-    </div>
+    <c:if test="${not empty monthlyRevenue}">
+        <div class="chart-container">
+            <h4 class="mb-4">
+                <i class="fas fa-chart-bar"></i>
+                ${viewType == 'daily' ? 'Doanh Thu Theo Ngày - Tháng ' += selectedMonth += '/' += selectedYear : 'Doanh Thu Theo Tháng - Năm ' += selectedYear}
+            </h4>
+            <canvas id="revenueChart" height="80"></canvas>
+        </div>
+    </c:if>
 
     <!-- Room Revenue Chart -->
-    <div class="chart-container">
-        <h4 class="mb-4"><i class="fas fa-chart-pie"></i> Doanh Thu Theo Phòng (Top 10)</h4>
-        <canvas id="roomRevenueChart" height="80"></canvas>
-    </div>
+    <c:if test="${not empty roomRevenue}">
+        <div class="chart-container">
+            <h4 class="mb-4"><i class="fas fa-chart-pie"></i> Doanh Thu Theo Phòng (Top 10)</h4>
+            <canvas id="roomRevenueChart" height="80"></canvas>
+        </div>
+    </c:if>
 
     <!-- Recent Payments -->
-    <div class="table-container">
-        <h4 class="mb-4"><i class="fas fa-history"></i> Thanh Toán Gần Đây</h4>
-        <table class="table table-hover">
-            <thead>
-                <tr>
-                    <th>Mã HĐ</th>
-                    <th>Số Tiền</th>
-                    <th>Ngày</th>
-                    <th>Phương Thức</th>
-                    <th>Mô Tả</th>
-                </tr>
-            </thead>
-            <tbody>
-                <c:forEach var="payment" items="${recentPayments}">
+    <c:if test="${not empty recentPayments}">
+        <div class="table-container">
+            <h4 class="mb-4"><i class="fas fa-history"></i> Thanh Toán Gần Đây</h4>
+            <table class="table table-hover">
+                <thead>
                     <tr>
-                        <td><strong>#${payment.contractId}</strong></td>
-                        <td>
-                            <span style="color: #27ae60; font-weight: bold;">
-                                <fmt:formatNumber value="${payment.amount}" type="number" groupingUsed="true"/> VNĐ
-                            </span>
-                        </td>
-                        <td><fmt:formatDate value="${payment.paymentDate}" pattern="dd/MM/yyyy"/></td>
-                        <td>${payment.method}</td>
-                        <td>${payment.description}</td>
+                        <th>Mã HĐ</th>
+                        <th>Số Tiền</th>
+                        <th>Ngày</th>
+                        <th>Phương Thức</th>
+                        <th>Mô Tả</th>
                     </tr>
-                </c:forEach>
-            </tbody>
-        </table>
-    </div>
+                </thead>
+                <tbody>
+                    <c:forEach var="payment" items="${recentPayments}">
+                        <tr>
+                            <td><strong>#${payment.contractId}</strong></td>
+                            <td>
+                                <span style="color: #27ae60; font-weight: bold;">
+                                    <fmt:formatNumber value="${payment.amount}" type="number" groupingUsed="true"/> VNĐ
+                                </span>
+                            </td>
+                            <td><fmt:formatDate value="${payment.paymentDate}" pattern="dd/MM/yyyy"/></td>
+                            <td>${payment.method}</td>
+                            <td>${payment.description}</td>
+                        </tr>
+                    </c:forEach>
+                </tbody>
+            </table>
+        </div>
+    </c:if>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script>
+    // ✅ KIỂM TRA DỮ LIỆU TRƯỚC KHI VẼ CHART
+    <c:if test="${not empty monthlyRevenue}">
     // Revenue Chart Data
     const revenueLabels = [
         <c:forEach var="entry" items="${monthlyRevenue}" varStatus="status">
@@ -395,8 +410,10 @@
             }
         }
     });
+    </c:if>
 
     // Room Revenue Chart
+    <c:if test="${not empty roomRevenue}">
     const roomLabels = [
         <c:forEach var="entry" items="${roomRevenue}" varStatus="status">
             'Phòng ${entry.key}'${!status.last ? ',' : ''}
@@ -457,6 +474,7 @@
             }
         }
     });
+    </c:if>
 </script>
 
 </body>

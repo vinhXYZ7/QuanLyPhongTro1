@@ -10,9 +10,15 @@ import models.User;
 import java.io.IOException;
 
 /**
- * Filter để bảo vệ trang Thống Kê - CHỈ ADMIN MỚI TRUY CẬP ĐƯỢC
+ * ⚠️ FILTER NÀY CÓ THỂ GÂY XUNG ĐỘT!
+ *
+ * CÁCH SỬA:
+ * 1. Tắt filter này (comment @WebFilter)
+ * 2. Hoặc đổi logic kiểm tra để không redirect
+ *
+ * Hiện tại đang TẮT để xử lý quyền trong Controller
  */
-@WebFilter(urlPatterns = {"/thong-ke"})
+// @WebFilter(urlPatterns = {"/thong-ke"})  // ✅ ĐÃ TẮT
 public class StatisticsAuthFilter implements Filter {
 
     @Override

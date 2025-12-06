@@ -10,27 +10,17 @@
         background-color: #f8f9fa;
     }
 
-    /* Hero Banner ĐÃ BỎ LỚP PHỦ VÀ TĂNG CHIỀU CAO */
+    /* Hero Banner */
     .hero-banner {
-        /* Chỉ giữ lại ảnh nền (background-image) */
         background-image: url('https://goghepminhcuong.com/wp-content/uploads/2023/12/AdobeStock_621015737-scaled.jpeg');
-
         background-size: cover;
         background-position: center;
-
-        /* Tăng padding để banner hiện rõ hơn */
         padding: 120px 0;
-
         margin-bottom: 50px;
-        color: white; /* Đổi màu chữ thành trắng để nổi bật */
+        color: white;
         text-align: center;
         box-shadow: 0 4px 20px rgba(0,0,0,0.2);
         position: relative;
-    }
-
-    /* ĐÃ BỎ LỚP PHỦ, KHÔNG CẦN THẺ GIẢ ::before NỮA */
-    .hero-banner::before {
-        content: none;
     }
 
     .hero-content {
@@ -42,7 +32,6 @@
         font-size: 3.5rem;
         font-weight: 700;
         margin-bottom: 20px;
-        /* Thêm text-shadow đậm để chữ nổi bật trên ảnh */
         text-shadow: 0 0 10px rgba(0, 0, 0, 0.8), 0 0 20px rgba(0, 0, 0, 0.6);
         animation: fadeInDown 1s ease;
         color: white;
@@ -53,7 +42,6 @@
         opacity: 0.95;
         max-width: 700px;
         margin: 0 auto;
-        /* Thêm text-shadow cho chữ dễ đọc */
         text-shadow: 0 0 5px rgba(0,0,0,0.5);
         animation: fadeInUp 1s ease 0.3s both;
         color: white;
@@ -61,7 +49,7 @@
 
     .welcome-name {
         font-weight: 700;
-        color: #ffd700; /* Giữ màu vàng nổi bật */
+        color: #ffd700;
         text-shadow: 0 2px 10px rgba(0,0,0,0.5);
     }
 
@@ -109,7 +97,7 @@
         color: #7f8c8d;
     }
 
-    /* Feature Cards - Căn giữa các nút */
+    /* Feature Cards */
     .feature-card {
         background: white;
         border-radius: 15px;
@@ -244,7 +232,7 @@
         <div class="container">
             <h1>🏠 Hệ Thống Quản Lý B O A</h1>
             <p>
-
+                Chào mừng <span class="welcome-name">${sessionScope.user.fullName}</span>!<br>
                 Quản lý toàn diện mọi hoạt động cho thuê phòng trọ của bạn.
             </p>
         </div>
@@ -259,6 +247,7 @@
         </div>
 
         <div class="row g-4">
+            <!-- 1. PHÒNG -->
             <div class="col-md-6 col-lg-4">
                 <div class="feature-card card-rooms">
                     <div>
@@ -274,6 +263,7 @@
                 </div>
             </div>
 
+            <!-- 2. KHÁCH THUÊ -->
             <div class="col-md-6 col-lg-4">
                 <div class="feature-card card-tenants">
                     <div>
@@ -289,6 +279,7 @@
                 </div>
             </div>
 
+            <!-- 3. HỢP ĐỒNG -->
             <div class="col-md-6 col-lg-4">
                 <div class="feature-card card-contracts">
                     <div>
@@ -304,6 +295,7 @@
                 </div>
             </div>
 
+            <!-- 4. THANH TOÁN -->
             <div class="col-md-6 col-lg-4">
                 <div class="feature-card card-payments">
                     <div>
@@ -319,6 +311,7 @@
                 </div>
             </div>
 
+            <!-- 5. THỐNG KÊ (CHỈ ADMIN) -->
             <c:if test="${sessionScope.user.role == 'admin'}">
                 <div class="col-md-6 col-lg-4">
                     <div class="feature-card card-statistics">
@@ -326,8 +319,8 @@
                             <div class="feature-icon">
                                 <i class="fas fa-chart-line"></i>
                             </div>
-                            <h3>Thống Kê</h3>
-                            <p>Theo dõi doanh thu, biểu đồ và báo cáo kinh doanh.</p>
+                            <h3> Thống Kê</h3>
+                            <p>Theo dõi doanh thu, biểu đồ và báo cáo kinh doanh chi tiết.</p>
                         </div>
                         <a href="${pageContext.request.contextPath}/thong-ke" class="feature-link">
                             Xem Thống Kê <i class="fas fa-arrow-right"></i>
@@ -336,6 +329,15 @@
                 </div>
             </c:if>
         </div>
+
+        <!-- ✅ THÔNG BÁO CHO USER THƯỜNG -->
+        <c:if test="${sessionScope.user.role != 'admin'}">
+            <div class="alert alert-info mt-4 text-center" style="border-radius: 15px;">
+                <i class="fas fa-info-circle"></i>
+                <strong>Lưu ý:</strong> Chức năng <strong>Thống Kê</strong> chỉ dành cho tài khoản Admin.
+                Vui lòng liên hệ quản trị viên để nâng cấp quyền.
+            </div>
+        </c:if>
     </div>
 </div>
 

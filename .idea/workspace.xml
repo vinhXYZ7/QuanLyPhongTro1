@@ -5,20 +5,16 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="dfeb0f49-82dd-4afe-8238-7c0cab5c6721" name="Changes" comment="thêm phân quyền và đồng bộ giao diện">
+      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/Controller/ContractController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/Controller/ContractController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/Controller/PaymentController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/Controller/PaymentController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/Controller/RoomController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/Controller/RoomController.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/Controller/StatisticsController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/Controller/StatisticsController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/Controller/TenantController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/Controller/TenantController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/dao/ContractDAO.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/dao/ContractDAO.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/dao/PaymentDAO.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/dao/PaymentDAO.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/dao/RoomDAO.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/dao/RoomDAO.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/dao/TenantDAO.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/dao/TenantDAO.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/webapp/WEB-INF/views/layout/_header.jsp" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/webapp/WEB-INF/views/layout/_header.jsp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/dao/StatisticsDAO.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/dao/StatisticsDAO.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/filters/StatisticsAuthFilter.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/filters/StatisticsAuthFilter.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/webapp/WEB-INF/views/room/dashboard.jsp" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/webapp/WEB-INF/views/room/dashboard.jsp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/webapp/WEB-INF/views/room/room-form.jsp" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/webapp/WEB-INF/views/room/room-form.jsp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/webapp/WEB-INF/views/tenant/tenant-form.jsp" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/webapp/WEB-INF/views/tenant/tenant-form.jsp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/webapp/WEB-INF/views/statistics/statistics.jsp" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/webapp/WEB-INF/views/statistics/statistics.jsp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/Controller/StatisticsController.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/Controller/StatisticsController.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/dao/StatisticsDAO.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/dao/StatisticsDAO.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/filters/StatisticsAuthFilter.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/filters/StatisticsAuthFilter.class" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -57,24 +53,25 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252&quot;: &quot;true&quot;,
-    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
-    &quot;Smart Tomcat.Unnamed.executor&quot;: &quot;Run&quot;,
-    &quot;Smart Tomcat.quan-ly-phong.executor&quot;: &quot;Run&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;main&quot;,
-    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
-    &quot;last_opened_file_path&quot;: &quot;D:/QuanLyPhongTroMV1/QuanLyPhongTroMV/pom.xml&quot;,
-    &quot;project.structure.last.edited&quot;: &quot;Modules&quot;,
-    &quot;project.structure.proportion&quot;: &quot;0.0&quot;,
-    &quot;project.structure.side.proportion&quot;: &quot;0.0&quot;,
-    &quot;settings.editor.selected.configurable&quot;: &quot;preferences.pluginManager&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "ModuleVcsDetector.initialDetectionPerformed": "true",
+    "RunOnceActivity.OpenProjectViewOnStart": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "Smart Tomcat.Unnamed.executor": "Run",
+    "Smart Tomcat.quan-ly-phong.executor": "Run",
+    "git-widget-placeholder": "main",
+    "ignore.preview.features.used": "true",
+    "kotlin-language-version-configured": "true",
+    "last_opened_file_path": "D:/QuanLyPhongTroMV1/QuanLyPhongTroMV/pom.xml",
+    "project.structure.last.edited": "Project",
+    "project.structure.proportion": "0.12407863",
+    "project.structure.side.proportion": "0.28410915",
+    "settings.editor.selected.configurable": "preferences.pluginManager"
   }
-}</component>
+}]]></component>
   <component name="RecentsManager">
     <key name="MoveFile.RECENT_KEYS">
       <recent name="D:\a45091\BAI TAP LON JAVA\QuanLyPhongTroMV\src\main\Webapp\WEB-INF\views\room" />
